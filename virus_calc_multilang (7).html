@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virus Resistance Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeInText {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      animation: fadeInScale 0.5s ease-out;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+    label, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    input {
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: box-shadow 0.3s;
+    }
+    input:focus {
+      box-shadow: 0 0 8px rgba(0,195,255,0.6);
+      outline: none;
+    }
+    button {
+      padding: 0.75rem;
+      background-color: #00c3ff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    button:hover {
+      background-color: #007bb8;
+      transform: scale(1.03);
+    }
+    .flags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .flag-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: white;
+      font-size: 0.9rem;
+      transition: transform 0.3s;
+    }
+    .flag-button:hover {
+      transform: scale(1.2) rotate(-2deg);
+    }
+    .flag-button img {
+      width: 36px;
+      height: 26px;
+      margin-bottom: 0.2rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #output {
+      white-space: pre-line;
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 1.1rem;
+      opacity: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.5rem;
+      text-align: center;
+    }
+    th {
+      background: rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flags">
+      <button class="flag-button" onclick="setLanguage('en')">
+        <img src="https://flagcdn.com/us.svg" alt="English" /> English
+      </button>
+      <button class="flag-button" onclick="setLanguage('es')">
+        <img src="https://flagcdn.com/es.svg" alt="Español" /> Español
+      </button>
+      <button class="flag-button" onclick="setLanguage('ko')">
+        <img src="https://flagcdn.com/kr.svg" alt="Korean" /> 한국어
+      </button>
+      <button class="flag-button" onclick="setLanguage('pt')">
+        <img src="https://flagcdn.com/br.svg" alt="Português" /> Português
+      </button>
+      <button class="flag-button" onclick="setLanguage('zh')">
+        <img src="https://flagcdn.com/cn.svg" alt="中文" /> 中文
+      </button>
+      <button class="flag-button" onclick="setLanguage('fr')">
+        <img src="https://flagcdn.com/fr.svg" alt="Français" /> Français
+      </button>
+    </div>
+    <h2 id="title">Virus Resistance Calculator</h2>
+    <label id="label1" for="required">Required Resistance:</label>
+    <input type="number" id="required" />
+
+    <label id="label2" for="current">Current Resistance:</label>
+    <input type="number" id="current" />
+
+    <label id="label3" for="enemy">Enemy Power:</label>
+    <input type="number" id="enemy" />
+
+    <button onclick="calculate()" id="calcBtn">Calculate</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    let currentLang = 'en';
+    const translations = {
+      en: ["Virus Resistance Calculator","Required Resistance:","Current Resistance:","Enemy Power:","Calculate","Damage Reduced","Required Power to Overcome Enemy","Resistance","Damage Reduced","Required Power"],
+      es: ["Calculadora de Resistencia al Virus","Resistencia Necesaria:","Resistencia Actual:","Poder del Enemigo:","Calcular","Daño Reducido","Poder Necesario para Vencer al Enemigo","Resistencia","Daño Reducido","Poder Necesario"],
+      ko: ["바이러스 저항력계산기","필요 저항력:","현재 저항력:","적 힘:","계산","감소된 피해","적을 이기기 위한 필요 전투력","저항력","감소된 피해","필요 전투력"],
+      pt: ["Calculadora de Resistência ao Vírus","Resistência Necessária:","Resistência Atual:","Poder do Inimigo:","Calcular","Dano Reduzido","Poder Necessário para Vencer o Inimigo","Resistência","Dano Reduzido","Poder Necessário"],
+      zh: ["疫苗耐力計算器","需要耐力:","目前耐力:","敵人力量:","計算","减免伤害","击败敌人所需战斗力","耐力","减免伤害","所需战力"],
+      fr: ["Calculatrice de Résistance au Virus","Résistance Requise:","Résistance Actuelle:","Puissance de l'Ennemi:","Calculer","Dégâts Réduits","Puissance Nécessaire pour Vaincre l’Ennemi","Résistance","Dégâts Réduits","Puissance Nécessaire"]
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.getElementById("title").innerText = t[0];
+      document.getElementById("label1").innerText = t[1];
+      document.getElementById("label2").innerText = t[2];
+      document.getElementById("label3").innerText = t[3];
+      document.getElementById("calcBtn").innerText = t[4];
+      document.getElementById("output").style.opacity = 0;
+    }
+
+    function calculate() {
+      const locale = currentLang === 'zh' ? 'zh-CN' : currentLang;
+      const required = parseFloat(document.getElementById("required").value);
+      const current = parseFloat(document.getElementById("current").value);
+      const enemyPower = parseFloat(document.getElementById("enemy").value);
+      if (isNaN(required) || isNaN(current)) {
+        document.getElementById("output").innerText = "Please enter valid resistance values.";
+        return;
+      }
+      // calculate damage percent
+      let missing = required - current;
+      let missingPercent = missing / required;
+      let ceilingPercent = Math.ceil(missingPercent * 100);
+      let damagePercent = 100 - (2 * ceilingPercent);
+      if (damagePercent <= 0) {
+        damagePercent = Math.max(0.1, (damagePercent / 20) + 1);
+      }
+      let damageReduced = 100 - damagePercent;
+      const t = translations[currentLang];
+      const labelReduced = t[5];
+      const labelPower = t[6];
+      // format reduced with localized separators
+      const formattedReduced = damageReduced.toLocaleString(locale, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+      let result = `${labelReduced}: ${formattedReduced}%`;
+      if (!isNaN(enemyPower)) {
+        const neededPower = Math.round(enemyPower / (damagePercent / 100));
+        const formattedPower = neededPower.toLocaleString(locale);
+        result += `\n${labelPower}: ${formattedPower}`;
+      }
+      // build table
+      const labelRes = t[7];
+      const headerRed = t[8];
+      const headerPow = t[9];
+      let table = `<table><tr><th>${labelRes}</th><th>${headerRed}</th><th>${headerPow}</th></tr>`;
+      for (let i = 1; i <= 5; i++) {
+        let r = current + 250 * i;
+        let miss = required - r;
+        let missPct = miss / required;
+        let ceilPct = Math.ceil(missPct * 100);
+        let dPct = 100 - (2 * ceilPct);
+        if (dPct <= 0) { dPct = Math.max(0.1, (dPct / 20) + 1); }
+        let dr = 100 - dPct;
+        const formattedR = r.toLocaleString(locale);
+        const formattedDr = dr.toLocaleString(locale, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+        let np = enemyPower ? Math.round(enemyPower / (dPct / 100)) : '-';
+        const formattedNp = enemyPower ? np.toLocaleString(locale) : '-';
+        table += `<tr><td>${formattedR}</td><td>${formattedDr}%</td><td>${formattedNp}</td></tr>`;
+      }
+      table += '</table>';
+      const outputEl = document.getElementById("output");
+      outputEl.innerHTML = result + table;
+      outputEl.style.animation = "fadeInText 0.5s ease-out forwards";
+    }
+
+    // Initialize
+    setLanguage('en');
+  </script>
+</body>
+</html>
